@@ -42,9 +42,9 @@ namespace LoLInfo
         public static void CloseGame(Process[] processes)
         {
             MessageBoxResult result = MessageBoxResult.None;
-            while(result != MessageBoxResult.OK)
+            while (result != MessageBoxResult.OK)
             {
-                if(result != MessageBoxResult.Cancel)
+                if (result != MessageBoxResult.Cancel)
                     result = MessageBox.Show("YasuCLOSE has detected a Yasuo in your game!\nThe game will now close.", "YasuoCLOSE", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
                 else
                     result = MessageBox.Show("The game will now close anyway.", "YasuoCLOSE", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
@@ -59,7 +59,6 @@ namespace LoLInfo
             }
             catch { }
 
-            Thread.Sleep(500);
         }
 
         public static void YasuoCLOSE(RiotClient client, Settings settings, CancellationToken ct)
@@ -68,24 +67,23 @@ namespace LoLInfo
             {
                 Process[] lolProcess = null;
 
-                if (!string.IsNullOrWhiteSpace(settings.ProcessName))
+                try
                 {
-                    try
+                    lolProcess = Process.GetProcessesByName(settings.ProcessName);
+                    if (lolProcess?.Any() == true)
                     {
-                        lolProcess = Process.GetProcessesByName(settings.ProcessName);
-                        if (lolProcess?.Any() == true)
-                        {
-                            if (GetData.YasuoInGame(client, settings.SummonerName, ct))
-                                CloseGame(lolProcess);
-                        }
-                    }
-                    finally
-                    {
-                        if (lolProcess != null)
-                            foreach (var p in lolProcess)
-                                p.Dispose();
+                        if (GetData.YasuoInGame(client, settings.SummonerName, ct))
+                            CloseGame(lolProcess);
                     }
                 }
+                finally
+                {
+                    if (lolProcess != null)
+                        foreach (var p in lolProcess)
+                            p.Dispose();
+                }
+
+                Thread.Sleep(500);
             }
         }
 
